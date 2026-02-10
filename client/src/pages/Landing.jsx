@@ -181,9 +181,9 @@ export default function Landing() {
             playsInline
             className="w-full h-full object-cover opacity-50"
           >
-            {/* Local waste segregation video */}
+            {/* Cloudinary hosted waste segregation video */}
             <source
-              src="/vecteezy_person-puts-glass-bottle-into-a-green-recycling-container-on_71727935.mp4"
+              src="https://res.cloudinary.com/dlhf6g1t4/video/upload/v1770767837/VIDEO-2026-02-11-05-26-35_ynjp19.mp4"
               type="video/mp4"
             />
           </video>
