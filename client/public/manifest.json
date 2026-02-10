@@ -1,0 +1,42 @@
+{
+  "name": "WasteSeg AI - Smart Waste Classification",
+  "short_name": "WasteSeg AI",
+  "description": "AI-powered waste classification app. Scan, learn, and dispose responsibly.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a1f1a",
+  "theme_color": "#0a1f1a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "lifestyle"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Scan Waste",
+      "short_name": "Scan",
+      "description": "Scan a waste item for classification",
+      "url": "/scan",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Find Centers",
+      "short_name": "Find",
+      "description": "Find nearby disposal centers",
+      "url": "/find",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
