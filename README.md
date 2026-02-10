@@ -103,16 +103,19 @@ npm run build         # Builds the frontend
 - 🏆 **Leaderboard** - Compete with others to save the planet
 - 🎯 **Daily Challenges** - Complete tasks to earn bonus points
 - 📜 **Scan History** - View past scans with MongoDB persistence
-- Tailwind CSS
 
-## How can I deploy this project?
+## Deployment
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Backend (Render.com)
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Set root directory to `server`
+4. Add environment variables (OPENAI_API_KEY, MONGODB_URI)
+5. Deploy
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Frontend (Vercel)
+1. Import project on Vercel
+2. Set root directory to `client`
+3. Set build command: `npm run build`
+4. Set output directory: `dist`
+5. Deploy
