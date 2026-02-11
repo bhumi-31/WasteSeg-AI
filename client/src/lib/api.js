@@ -72,6 +72,16 @@ export async function checkHealth() {
  */
 export function getUserId() {
   const USERID_KEY = 'wastewise-userId';
+  
+  // Demo mode - use a user that has existing data for presentation
+  // Set ?demo=true in URL to enable demo mode, or remove this for production
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('demo') === 'true') {
+    const demoUserId = 'user_u6xe1f71b_1770749880241';
+    localStorage.setItem(USERID_KEY, demoUserId);
+    return demoUserId;
+  }
+  
   let userId = localStorage.getItem(USERID_KEY);
   if (!userId) {
     userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
