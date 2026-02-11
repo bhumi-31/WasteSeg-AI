@@ -11,13 +11,11 @@ export default function History() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // First load from localStorage (instant)
     setHistory(getScanHistory());
     setScore(getScore());
     setTotalScans(getTotalScans());
     setLoading(false);
     
-    // Then fetch from database (async update)
     async function loadFromDb() {
       try {
         const [dbHistory, dbStats] = await Promise.all([
@@ -30,7 +28,7 @@ export default function History() {
           setTotalScans(dbStats.totalScans || 0);
         }
       } catch (error) {
-        console.log('Using localStorage data');
+        // Fallback to localStorage
       }
     }
     loadFromDb();
@@ -43,9 +41,7 @@ export default function History() {
       <h1 className="font-heading text-2xl font-bold text-white sm:text-3xl">Your Impact Dashboard</h1>
       <p className="mt-1 text-sm text-white/60">Track your sustainability journey.</p>
 
-      {/* Gamification */}
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        {/* Score Card */}
         <div className="rounded-2xl border border-white/10 bg-white/5 p-5 lift-card">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20">
@@ -59,7 +55,6 @@ export default function History() {
           <p className="mt-3 text-xs text-white/50">+5 points per scan</p>
         </div>
 
-        {/* Contribution Card */}
         <div className="rounded-2xl border border-white/10 bg-white/5 p-5 lift-card">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20">
@@ -76,7 +71,6 @@ export default function History() {
         </div>
       </div>
 
-      {/* Progress */}
       <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium text-white">Environmental Contribution</p>
@@ -95,7 +89,6 @@ export default function History() {
         </p>
       </div>
 
-      {/* History */}
       <div className="mt-10">
         <h2 className="font-heading text-lg font-semibold text-white">Scan History</h2>
 

@@ -76,7 +76,6 @@ export default function Leaderboard() {
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-2xl px-4 py-6 pt-24 pb-24 sm:px-6 sm:pt-28">
-        {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <Link 
             to="/"
@@ -93,7 +92,6 @@ export default function Leaderboard() {
           </div>
         </div>
 
-        {/* User Rank Card */}
         {userRank && userRank.rank && (
           <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl shadow-lg p-5 mb-6 text-white">
             <div className="flex items-center justify-between">
@@ -119,10 +117,8 @@ export default function Leaderboard() {
           </div>
         )}
 
-        {/* Top 3 Podium */}
         {leaderboard.length >= 3 && (
           <div className="flex items-end justify-center gap-4 mb-8">
-            {/* 2nd Place */}
             <div className="flex flex-col items-center">
               <div className="w-16 h-16 rounded-full bg-gray-500/20 flex items-center justify-center mb-2 shadow-lg border border-gray-500/30">
                 <span className="text-2xl font-bold text-gray-300">2</span>
@@ -136,7 +132,6 @@ export default function Leaderboard() {
               </div>
             </div>
 
-            {/* 1st Place */}
             <div className="flex flex-col items-center -mt-4">
               <Crown className="h-8 w-8 text-yellow-500 mb-1" />
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-300 to-amber-400 flex items-center justify-center mb-2 shadow-elevated ring-4 ring-yellow-200 dark:ring-yellow-700">
@@ -151,7 +146,6 @@ export default function Leaderboard() {
               </div>
             </div>
 
-            {/* 3rd Place */}
             <div className="flex flex-col items-center">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-2 shadow-card">
                 <span className="text-2xl font-bold text-amber-800">3</span>
@@ -167,7 +161,6 @@ export default function Leaderboard() {
           </div>
         )}
 
-        {/* Stats Summary */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className="bg-white/5 rounded-xl p-4 text-center shadow-lg border border-white/10">
             <Users className="h-5 w-5 text-emerald-400 mx-auto mb-1" />
@@ -190,7 +183,6 @@ export default function Leaderboard() {
           </div>
         </div>
 
-        {/* Error State */}
         {error && (
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-6">
             <p className="text-red-400 text-center">{error}</p>
@@ -203,7 +195,6 @@ export default function Leaderboard() {
           </div>
         )}
 
-        {/* Leaderboard List */}
         <div className="bg-white/5 rounded-2xl shadow-lg overflow-hidden border border-white/10">
           <div className="p-4 border-b border-white/10">
             <h2 className="font-heading font-semibold text-white flex items-center gap-2">
@@ -234,12 +225,10 @@ export default function Leaderboard() {
                       getRankBackground(user.rank)
                     } ${isCurrentUser ? 'ring-2 ring-emerald-500 ring-inset' : ''}`}
                   >
-                    {/* Rank */}
                     <div className="w-10 flex items-center justify-center">
                       {getRankIcon(user.rank)}
                     </div>
 
-                    {/* User Info */}
                     <div className="flex-1 min-w-0">
                       <p className={`font-medium truncate ${
                         isCurrentUser 
@@ -271,7 +260,6 @@ export default function Leaderboard() {
                       </div>
                     </div>
 
-                    {/* Points */}
                     <div className="text-right">
                       <p className={`text-lg font-bold font-heading ${
                         user.rank <= 3 

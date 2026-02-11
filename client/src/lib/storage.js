@@ -27,7 +27,6 @@ const DEFAULT_STATS = {
  */
 export async function initializeData() {
   const userId = getUserId();
-  console.log('[Storage] Initializing data for user:', userId);
   
   try {
     // Fetch fresh data from database
@@ -51,7 +50,6 @@ export async function initializeData() {
         timestamp: scan.timestamp
       }));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(formattedHistory));
-      console.log('[Storage] Synced', formattedHistory.length, 'scans from database');
     }
     
     if (dbStats && dbStats.totalScans > 0) {
@@ -59,7 +57,6 @@ export async function initializeData() {
       if (dbStats.badges) {
         localStorage.setItem(BADGES_KEY, JSON.stringify(dbStats.badges));
       }
-      console.log('[Storage] Synced stats from database:', dbStats.totalScans, 'scans,', dbStats.totalPoints, 'points');
     }
     
     localStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
@@ -225,13 +222,8 @@ export async function saveScanResult(result) {
       tips: result.tips || [],
       imageUrl: result.imageUrl || ''
     });
-    console.log('[DB] Scan saved to database');
     
-    // Update challenge progress
     const challengeResult = await updateChallengeProgress(category);
-    if (challengeResult.newlyCompleted?.length > 0) {
-      console.log('[Challenges] Completed:', challengeResult.newlyCompleted.map(c => c.title).join(', '));
-    }
   } catch (error) {
     console.warn('Failed to save to database, using localStorage:', error.message);
   }

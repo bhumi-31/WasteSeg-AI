@@ -102,7 +102,6 @@ export default function Challenges() {
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-2xl px-4 py-6 pt-24 pb-24 sm:px-6 sm:pt-28">
-        {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <Link 
             to="/"
@@ -119,7 +118,6 @@ export default function Challenges() {
           </div>
         </div>
 
-        {/* Timer & Progress */}
         <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl shadow-lg p-5 mb-6 text-white">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -133,7 +131,6 @@ export default function Challenges() {
             </div>
           </div>
           
-          {/* Progress Bar */}
           <div className="mb-3">
             <div className="h-3 bg-white/30 rounded-full overflow-hidden">
               <div 
@@ -152,7 +149,6 @@ export default function Challenges() {
           </div>
         </div>
 
-        {/* Bonus Banner - All Complete */}
         {completedCount === challenges.length && challenges.length > 0 && (
           <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl p-5 mb-6 text-white text-center">
             <Trophy className="h-12 w-12 mx-auto mb-2 text-yellow-300" />
@@ -161,7 +157,6 @@ export default function Challenges() {
           </div>
         )}
 
-        {/* Challenge Cards */}
         <div className="space-y-4">
           {challenges.map((challenge) => {
             const CategoryIcon = CATEGORY_ICONS[challenge.category] || Scan;
@@ -179,12 +174,10 @@ export default function Challenges() {
               >
                 <div className="p-5">
                   <div className="flex items-start gap-4">
-                    {/* Icon */}
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colorClass}`}>
                       <CategoryIcon className="h-6 w-6" />
                     </div>
                     
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-heading font-semibold text-white">
@@ -198,7 +191,6 @@ export default function Challenges() {
                         {challenge.description}
                       </p>
                       
-                      {/* Progress */}
                       <div className="mb-3">
                         <div className="flex items-center justify-between text-xs mb-1">
                           <span className="text-white/60">
@@ -222,7 +214,6 @@ export default function Challenges() {
                         </div>
                       </div>
                       
-                      {/* Reward */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5 text-sm">
                           <Gift className="h-4 w-4 text-emerald-400" />
@@ -231,7 +222,6 @@ export default function Challenges() {
                           </span>
                         </div>
                         
-                        {/* Claim Button */}
                         {challenge.completed && !challenge.rewardClaimed && (
                           <button
                             onClick={() => handleClaimReward(challenge.id)}
@@ -274,7 +264,6 @@ export default function Challenges() {
           })}
         </div>
 
-        {/* Empty State */}
         {challenges.length === 0 && !loading && (
           <div className="bg-white/5 rounded-2xl p-8 text-center border border-white/10 shadow-lg">
             <Target className="h-12 w-12 text-white/30 mx-auto mb-3" />
@@ -294,7 +283,6 @@ export default function Challenges() {
           </div>
         )}
 
-        {/* Tips Section */}
         <div className="mt-6 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5">
           <h3 className="font-heading font-semibold text-white mb-3 flex items-center gap-2">
             <Zap className="h-5 w-5 text-emerald-400" />

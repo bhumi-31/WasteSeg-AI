@@ -86,7 +86,6 @@ export function getUserId() {
   if (!userId) {
     userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
     localStorage.setItem(USERID_KEY, userId);
-    console.log('[Auth] New user created:', userId);
   }
   return userId;
 }
@@ -99,11 +98,9 @@ export function getUserId() {
 export function setUserId(userId) {
   if (userId && userId.startsWith('user_')) {
     localStorage.setItem('wastewise-userId', userId);
-    // Clear local cache so fresh data is fetched
     localStorage.removeItem('wasteseg-history');
     localStorage.removeItem('wasteseg-stats');
     localStorage.removeItem('wasteseg-badges');
-    console.log('[Auth] User restored:', userId);
     return true;
   }
   return false;

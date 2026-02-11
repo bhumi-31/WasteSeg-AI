@@ -133,13 +133,11 @@ export default function Result() {
 
   return (
     <div className="mx-auto max-w-xl px-4 py-10 pt-24 sm:py-16 sm:pt-28 relative">
-      {/* Confetti Canvas */}
       <canvas
         ref={confettiCanvasRef}
         className="fixed inset-0 pointer-events-none z-50"
         style={{ width: '100vw', height: '100vh' }}
       />
-      {/* Header */}
       <div className="mb-6 text-center">
         <h1 className="font-heading text-2xl font-bold text-white">Analysis Complete</h1>
         <p className="mt-1 text-sm text-white/60">
@@ -147,9 +145,7 @@ export default function Result() {
         </p>
       </div>
 
-      {/* Main Result Card */}
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-lg">
-        {/* Category Header */}
         <div className={`${config.gradient} px-6 py-8 text-center text-white`}>
           <config.Icon className="h-14 w-14 mx-auto" />
           <h2 className="mt-3 font-heading text-2xl font-bold">{config.label}</h2>
@@ -164,7 +160,6 @@ export default function Result() {
           )}
         </div>
 
-        {/* Image Preview */}
         <div className="border-b border-white/10 px-6 py-4">
           <div className="overflow-hidden rounded-xl">
             <img
@@ -175,7 +170,6 @@ export default function Result() {
           </div>
         </div>
 
-        {/* Bin Information */}
         <div className={`mx-4 my-4 rounded-xl ${config.bgLight} ${config.borderColor} border p-4`}>
           <div className="flex items-center gap-3">
             <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${config.gradient}`}>
@@ -190,7 +184,6 @@ export default function Result() {
           </div>
         </div>
 
-        {/* Disposal Steps */}
         {state.disposalSteps && state.disposalSteps.length > 0 && (
           <div className="border-t border-white/10 px-6 py-5">
             <div className="flex items-center gap-2 text-sm font-semibold text-white">
@@ -210,7 +203,6 @@ export default function Result() {
           </div>
         )}
 
-        {/* Warnings (for hazardous items) */}
         {state.warnings && state.warnings.length > 0 && (
           <div className="mx-4 mb-4 rounded-xl border border-red-200 bg-red-50 p-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-red-700">
@@ -225,7 +217,6 @@ export default function Result() {
           </div>
         )}
 
-        {/* Environmental Tip */}
         {state.environmentalTip && (
           <div className="mx-4 mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-amber-700">
@@ -236,7 +227,6 @@ export default function Result() {
           </div>
         )}
 
-        {/* Processing Time */}
         {state.processingTime && (
           <div className="flex items-center justify-center gap-2 border-t border-white/10 px-6 py-3 text-xs text-white/50">
             <Clock className="h-3 w-3" />
@@ -244,7 +234,6 @@ export default function Result() {
           </div>
         )}
 
-        {/* Actions */}
         <div className="flex gap-3 border-t border-white/10 bg-white/5 px-6 py-5">
           <button
             onClick={() => navigate('/scan')}
@@ -268,7 +257,6 @@ export default function Result() {
         </div>
       </div>
 
-      {/* Nearby Centers */}
       <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
         <div className="flex items-start gap-3">
           <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />

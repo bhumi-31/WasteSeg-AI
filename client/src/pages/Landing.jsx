@@ -170,9 +170,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section with Video Background */}
       <section className="relative min-h-[100vh] min-h-[100dvh] flex items-center justify-center overflow-hidden pt-24">
-        {/* Video Background */}
         <div className="absolute inset-0 z-0">
           <video
             autoPlay
@@ -181,26 +179,21 @@ export default function Landing() {
             playsInline
             className="w-full h-full object-cover opacity-50"
           >
-            {/* Cloudinary hosted waste segregation video */}
             <source
               src="https://res.cloudinary.com/dlhf6g1t4/video/upload/v1770767837/VIDEO-2026-02-11-05-26-35_ynjp19.mp4"
               type="video/mp4"
             />
           </video>
-          {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a1f1a]/70 via-[#0a1f1a]/50 to-[#0a1f1a]" />
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/30 to-transparent" />
         </div>
 
-        {/* Subtle gradient orbs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
           <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 left-1/4 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl" />
         </div>
 
-        {/* Hero Content */}
         <div className="relative z-20 mx-auto max-w-6xl px-4 sm:px-6 py-8 flex items-center justify-center">
-          {/* Main Headline */}
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl sm:text-6xl lg:text-8xl font-black tracking-tight leading-[0.9]">
               <span className="text-white">Know your</span>
@@ -213,7 +206,6 @@ export default function Landing() {
               Dispose responsibly.
             </p>
 
-            {/* CTA Buttons */}
             <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 to="/scan"
@@ -233,7 +225,6 @@ export default function Landing() {
               </Link>
             </div>
 
-            {/* Features */}
             <div className="mt-16 flex items-center justify-center gap-6 sm:gap-10 text-center">
               <div className="text-white text-base sm:text-lg font-semibold">AI Powered</div>
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -243,14 +234,11 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Scroll indicator removed */}
         </div>
       </section>
 
-      {/* 3R Principles Section */}
       <section ref={section1Ref} className="relative py-20 border-t border-white/5 scroll-section">
         <div ref={cardsRef} className="mx-auto max-w-5xl px-4 sm:px-6">
-          {/* Section Heading */}
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">
               The <span className="text-emerald-400">3R</span> Approach
@@ -267,18 +255,15 @@ export default function Landing() {
                 className={`group p-8 rounded-2xl bg-white/[0.02] hover:bg-white/[0.08] border border-transparent hover:border-emerald-500/20 transition-all duration-300 ease-out hover:scale-105 hover:-translate-y-2 hover:shadow-lg hover:shadow-emerald-500/10 cursor-pointer card-animate ${visibleCards.includes(index) ? 'animate-visible' : ''}`}
                 style={{ animationDelay: `${index * 150}ms` }}
               >
-                {/* Icon */}
                 <div className="mb-6 transition-transform duration-300 group-hover:scale-110">
                   <item.icon className="w-8 h-8 text-emerald-400" />
                 </div>
 
-                {/* Title */}
                 <h3 className="text-2xl font-bold mb-3">
                   <span className="text-emerald-400">{item.prefix}</span>
                   <span className="text-white">{item.title}</span>
                 </h3>
 
-                {/* Description */}
                 <p className="text-white/50 text-sm leading-relaxed">
                   {item.description}
                 </p>
@@ -288,9 +273,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Main Features - Cross Layout */}
       <section ref={section2Ref} className="relative py-24 scroll-section overflow-hidden">
-        {/* Title with Typewriter */}
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-white inline-flex items-center gap-3">
             <span className="text-emerald-400 text-xl">✦</span>
@@ -299,30 +282,22 @@ export default function Landing() {
           </h2>
         </div>
 
-        {/* Features Container */}
         <div ref={featuresRef} className="relative mx-auto max-w-4xl px-4 min-h-[480px] flex items-center justify-center">
           
-          {/* CENTER CROSS SHAPE */}
           <div className="relative">
-            {/* Vertical Bar of Cross */}
             <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-28 h-72 bg-gradient-to-b from-emerald-400 via-emerald-500 to-emerald-400 rounded-[60px] shadow-[0_0_80px_20px_rgba(52,211,153,0.4)] cross-glow" />
             
-            {/* Horizontal Bar of Cross */}
             <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-72 h-28 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 rounded-[60px] shadow-[0_0_80px_20px_rgba(52,211,153,0.3)] cross-glow" />
             
-            {/* Cross center glow */}
             <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-32 h-32 bg-emerald-400 rounded-full blur-2xl opacity-60" />
           </div>
 
-          {/* Sparkles */}
           <span className="absolute top-[10%] right-[25%] text-emerald-400 text-lg">✦</span>
           <span className="absolute top-[40%] right-[15%] text-emerald-400 text-sm">✦</span>
           <span className="absolute bottom-[35%] left-[22%] text-emerald-400 text-xs">✦</span>
           <span className="absolute bottom-[25%] right-[28%] text-emerald-400 text-sm">✦</span>
 
-          {/* TOP RIGHT - AI-Powered Scanning */}
           <div className={`absolute top-[8%] right-[12%] flex items-center feature-pill ${visibleFeatures.includes(0) ? 'animate-visible' : ''}`} style={{ animationDelay: '0ms' }}>
-            {/* Connector line */}
             <div className="hidden sm:block w-16 h-0.5 bg-gradient-to-r from-emerald-500/60 to-transparent mr-2" />
             <Link 
               to="/scan" 
@@ -332,7 +307,6 @@ export default function Landing() {
             </Link>
           </div>
 
-          {/* MIDDLE LEFT - Leaderboard */}
           <div className={`absolute top-[32%] left-[5%] sm:left-[8%] flex items-center feature-pill ${visibleFeatures.includes(1) ? 'animate-visible' : ''}`} style={{ animationDelay: '100ms' }}>
             <Link 
               to="/leaderboard" 
@@ -340,13 +314,10 @@ export default function Landing() {
             >
               <span className="text-white/90 font-medium text-sm whitespace-nowrap">Leaderboard</span>
             </Link>
-            {/* Connector line */}
             <div className="hidden sm:block w-20 h-0.5 bg-gradient-to-l from-emerald-500/60 to-transparent ml-2" />
           </div>
 
-          {/* MIDDLE RIGHT - Find Centers */}
           <div className={`absolute top-[45%] right-[5%] sm:right-[8%] flex items-center feature-pill ${visibleFeatures.includes(2) ? 'animate-visible' : ''}`} style={{ animationDelay: '200ms' }}>
-            {/* Connector line */}
             <div className="hidden sm:block w-20 h-0.5 bg-gradient-to-r from-emerald-500/60 to-transparent mr-2" />
             <Link 
               to="/find" 
@@ -356,7 +327,6 @@ export default function Landing() {
             </Link>
           </div>
 
-          {/* BOTTOM LEFT - Challenges */}
           <div className={`absolute bottom-[22%] left-[8%] sm:left-[12%] flex items-center feature-pill ${visibleFeatures.includes(3) ? 'animate-visible' : ''}`} style={{ animationDelay: '300ms' }}>
             <Link 
               to="/challenges" 
@@ -364,13 +334,10 @@ export default function Landing() {
             >
               <span className="text-white/90 font-medium text-sm whitespace-nowrap">Challenges</span>
             </Link>
-            {/* Connector line */}
             <div className="hidden sm:block w-16 h-0.5 bg-gradient-to-l from-emerald-500/60 to-transparent ml-2" />
           </div>
 
-          {/* BOTTOM RIGHT - Your Stats */}
           <div className={`absolute bottom-[18%] right-[8%] sm:right-[12%] flex items-center feature-pill ${visibleFeatures.includes(4) ? 'animate-visible' : ''}`} style={{ animationDelay: '400ms' }}>
-            {/* Connector line */}
             <div className="hidden sm:block w-16 h-0.5 bg-gradient-to-r from-emerald-500/60 to-transparent mr-2" />
             <Link 
               to="/stats" 
@@ -380,7 +347,6 @@ export default function Landing() {
             </Link>
           </div>
 
-          {/* Trash Icon at bottom of cross */}
           <div className="absolute bottom-[2%] left-1/2 -translate-x-1/2">
             <div className="w-10 h-12 bg-[#4a6b5a] rounded-t-lg rounded-b-xl border-2 border-[#5a7b6a] flex items-center justify-center">
               <div className="w-6 h-1 bg-[#5a7b6a] rounded absolute top-1" />
@@ -390,7 +356,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* How It Works */}
       <section ref={section3Ref} className="relative py-20 scroll-section">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <h2 ref={stepsHeadingRef} className="text-3xl sm:text-4xl font-bold text-white mb-16 text-center">
@@ -418,7 +383,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section ref={section4Ref} className="relative py-20 scroll-section">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
           <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
@@ -438,7 +402,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="relative py-8 border-t border-white/5">
         <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500">

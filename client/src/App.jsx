@@ -24,14 +24,7 @@ function AppContent() {
   const location = useLocation();
   
   useEffect(() => {
-    // Initialize and sync data from database on app load
-    initializeData().then(result => {
-      if (result.synced) {
-        console.log('[App] Data synced successfully');
-      } else {
-        console.log('[App] Using local data (offline mode)');
-      }
-    });
+    initializeData();
   }, []);
 
   return (

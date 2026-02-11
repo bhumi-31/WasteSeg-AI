@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import ReactDOMServer from 'react-dom/server';
 
-// Helper to render icon SVG for Leaflet markers
 const getIconSvg = (IconComponent, color = 'white', size = 20) => {
   return ReactDOMServer.renderToString(
     <IconComponent size={size} color={color} strokeWidth={2.5} />
@@ -17,7 +16,6 @@ const getIconSvg = (IconComponent, color = 'white', size = 20) => {
 };
 import 'leaflet/dist/leaflet.css';
 
-// Fix default Leaflet markers
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
@@ -25,7 +23,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-// Custom icons
 const createDustbinIcon = (color, IconComponent, isNearest = false, isSelected = false) => {
   const size = isSelected ? 48 : isNearest ? 44 : 36;
   const iconSize = isSelected ? 24 : isNearest ? 22 : 18;
@@ -87,7 +84,6 @@ const userIcon = L.divIcon({
   iconAnchor: [9, 9]
 });
 
-// Place types configuration
 const PLACE_TYPES = {
   dustbin: { label: 'Dustbins', query: 'amenity=waste_basket', color: 'hsl(var(--muted-foreground))', icon: Trash2 },
   recycling: { label: 'Recycling', query: 'amenity=recycling', color: 'hsl(var(--recyclable))', icon: Recycle },
@@ -95,7 +91,6 @@ const PLACE_TYPES = {
   compost: { label: 'Composting', query: 'landuse=landfill', color: 'hsl(var(--organic))', icon: Leaf }
 };
 
-// Haversine formula for distance calculation
 const calcDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -106,7 +101,6 @@ const calcDistance = (lat1, lon1, lat2, lon2) => {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-// Calculate bearing between two points
 const calcBearing = (lat1, lon1, lat2, lon2) => {
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
@@ -115,14 +109,12 @@ const calcBearing = (lat1, lon1, lat2, lon2) => {
   return ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
 };
 
-// Format distance
 const formatDistance = (km) => {
   if (km < 0.015) return 'Arrived!';
   if (km < 1) return `${Math.round(km * 1000)}m`;
   return `${km.toFixed(2)}km`;
 };
 
-// Format walking time
 const formatTime = (km) => {
   const minutes = Math.round(km / 5 * 60);
   if (minutes < 1) return '<1 min';
@@ -130,13 +122,11 @@ const formatTime = (km) => {
   return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
 };
 
-// Get direction text
 const getDirection = (bearing) => {
   const dirs = ['North', 'NE', 'East', 'SE', 'South', 'SW', 'West', 'NW'];
   return dirs[Math.round(bearing / 45) % 8];
 };
 
-// Map controller - handles smooth panning to user location
 function MapController({ userPos, destination, isNavigating, mapRef, shouldFollowUser }) {
   const map = useMap();
   
@@ -144,17 +134,14 @@ function MapController({ userPos, destination, isNavigating, mapRef, shouldFollo
     if (mapRef) mapRef.current = map;
   }, [map, mapRef]);
   
-  // Smooth pan to user position when it changes
   useEffect(() => {
     if (!userPos || !map) return;
     
     if (shouldFollowUser) {
       if (isNavigating && destination) {
-        // During navigation, fit bounds to show both points
         const bounds = L.latLngBounds([userPos, [destination.lat, destination.lng]]);
         map.fitBounds(bounds, { padding: [60, 60], maxZoom: 18, animate: true });
       } else {
-        // Smoothly pan to user location
         map.panTo(userPos, { animate: true, duration: 0.5 });
       }
     }
@@ -164,7 +151,6 @@ function MapController({ userPos, destination, isNavigating, mapRef, shouldFollo
 }
 
 export default function FindCenters() {
-  // Location state
   const [userPos, setUserPos] = useState(null);
   const [accuracy, setAccuracy] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -176,12 +162,10 @@ export default function FindCenters() {
   const [isLocationStale, setIsLocationStale] = useState(false);
   const [staleWarningShown, setStaleWarningShown] = useState(false);
   
-  // Places state
   const [placeType, setPlaceType] = useState('dustbin');
   const [places, setPlaces] = useState([]);
   const [searching, setSearching] = useState(false);
   
-  // Navigation state
   const [isNavigating, setIsNavigating] = useState(false);
   const [destination, setDestination] = useState(null);
   const [deviceHeading, setDeviceHeading] = useState(0);
@@ -190,13 +174,11 @@ export default function FindCenters() {
   const [initialDistance, setInitialDistance] = useState(0);
   const [shouldFollowUser, setShouldFollowUser] = useState(true);
   
-  // Refs
   const mapRef = useRef(null);
   const watchIdRef = useRef(null);
   const lastPosRef = useRef(null);
   const staleCheckCountRef = useRef(0);
 
-  // Main geolocation effect - IMPROVED with logging and stale detection
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocationError('Geolocation not supported in this browser');
@@ -204,13 +186,9 @@ export default function FindCenters() {
       return;
     }
 
-    console.log('[Map] Starting geolocation...');
-
-    // Get initial position first
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude, accuracy: acc } = position.coords;
-        console.log(`[Geo] Initial position: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (±${Math.round(acc)}m)`);
         
         setUserPos([latitude, longitude]);
         setAccuracy(acc);
@@ -235,17 +213,11 @@ export default function FindCenters() {
       }
     );
 
-    // Start watching position for live updates
-    console.log('[Watch] Starting watchPosition for live tracking...');
-    
     watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude, accuracy: acc } = position.coords;
         const timestamp = new Date();
         
-        console.log(`[Geo] Position update #${updateCount + 1}: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (±${Math.round(acc)}m)`);
-        
-        // Check if position actually changed
         if (lastPosRef.current) {
           const distMoved = calcDistance(
             lastPosRef.current.lat, 
@@ -255,19 +227,15 @@ export default function FindCenters() {
           ) * 1000; // Convert to meters
           
           if (distMoved < 0.5) {
-            // Position hasn't changed significantly
             staleCheckCountRef.current++;
-            console.log(`Position unchanged (${distMoved.toFixed(2)}m moved). Stale count: ${staleCheckCountRef.current}`);
             
             if (staleCheckCountRef.current >= 5 && !staleWarningShown) {
               setIsLocationStale(true);
               setStaleWarningShown(true);
             }
           } else {
-            // Position changed!
             staleCheckCountRef.current = 0;
             setIsLocationStale(false);
-            console.log(`[Move] Moved ${distMoved.toFixed(2)}m from last position`);
           }
         }
         
@@ -290,7 +258,6 @@ export default function FindCenters() {
 
     return () => {
       if (watchIdRef.current) {
-        console.log('🛑 Stopping watchPosition');
         navigator.geolocation.clearWatch(watchIdRef.current);
       }
     };
@@ -489,13 +456,11 @@ export default function FindCenters() {
     <div className="min-h-[calc(100vh-4rem)] p-4 md:p-6 pt-28 sm:pt-32 pb-24">
       <div className="max-w-4xl mx-auto space-y-4">
         
-        {/* Page Header */}
         <div className="mb-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Find Nearby</h1>
           <p className="text-white/60">Locate waste disposal points near you</p>
         </div>
         
-        {/* Laptop Warning Banner */}
         {isLocationStale && (
           <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4">
             <div className="flex items-start gap-3">
@@ -522,7 +487,6 @@ export default function FindCenters() {
           </div>
         )}
 
-        {/* Header - Hidden during navigation */}
         {!isNavigating && (
           <div className="bg-white/5 rounded-2xl shadow-lg border border-white/10 p-4">
             <div className="flex items-center justify-end mb-4">
@@ -536,7 +500,6 @@ export default function FindCenters() {
               </button>
             </div>
             
-            {/* Filter Tabs */}
             <div className="flex gap-2 overflow-x-auto pb-1">
               {Object.entries(PLACE_TYPES).map(([key, config]) => {
                 const IconComponent = config.icon;
@@ -559,7 +522,6 @@ export default function FindCenters() {
           </div>
         )}
 
-        {/* Nearest Place Banner - Hidden during navigation */}
         {nearestPlace && !isNavigating && (
           <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl shadow-lg p-4 text-white">
             <div className="flex items-center justify-between">
@@ -583,10 +545,8 @@ export default function FindCenters() {
           </div>
         )}
 
-        {/* Navigation Panel */}
         {isNavigating && destination && navInfo && (
           <div className="bg-white/5 rounded-2xl shadow-lg border border-white/10 overflow-hidden">
-            {/* Navigation Header */}
             <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 p-4 text-white">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
@@ -624,7 +584,6 @@ export default function FindCenters() {
                 </div>
               ) : (
                 <div className="flex items-center gap-6">
-                  {/* Direction Arrow */}
                   <div className="relative flex-shrink-0">
                     <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center">
                       <div 
@@ -637,12 +596,10 @@ export default function FindCenters() {
                     <p className="text-center text-sm mt-1 font-medium">{getDirection(navInfo.bearing)}</p>
                   </div>
                   
-                  {/* Distance Info */}
                   <div className="flex-1">
                     <p className="text-4xl font-bold">{formatDistance(navInfo.distance)}</p>
                     <p className="text-white/70">{formatTime(navInfo.distance)} walk</p>
                     
-                    {/* Progress Bar */}
                     <div className="mt-3">
                       <div className="h-2 bg-white/30 rounded-full overflow-hidden">
                         <div 
@@ -659,7 +616,6 @@ export default function FindCenters() {
           </div>
         )}
 
-        {/* Map Card */}
         <div className="bg-white/5 rounded-2xl shadow-lg border border-white/10 overflow-hidden">
           <div className={`relative ${isNavigating ? 'h-[350px]' : 'h-[400px] md:h-[450px]'}`}>
             {userPos && (
@@ -681,7 +637,6 @@ export default function FindCenters() {
                   shouldFollowUser={shouldFollowUser}
                 />
                 
-                {/* User location marker - KEY: uses userPos which updates on every watchPosition callback */}
                 <Marker position={userPos} icon={userIcon}>
                   <Popup>
                     <div className="text-center py-1">
@@ -692,7 +647,6 @@ export default function FindCenters() {
                   </Popup>
                 </Marker>
                 
-                {/* Dynamic accuracy circle - uses actual GPS accuracy */}
                 <Circle 
                   center={userPos} 
                   radius={accuracy || 30}
@@ -705,7 +659,6 @@ export default function FindCenters() {
                   }} 
                 />
                 
-                {/* Route line during navigation */}
                 {isNavigating && destination && (
                   <Polyline
                     positions={[userPos, [destination.lat, destination.lng]]}
@@ -718,7 +671,6 @@ export default function FindCenters() {
                   />
                 )}
                 
-                {/* Place markers */}
                 {placesWithDistance.map((place, index) => {
                   const IconComponent = currentConfig.icon;
                   return (
@@ -770,7 +722,6 @@ export default function FindCenters() {
               </MapContainer>
             )}
             
-            {/* Map Controls */}
             <div className="absolute bottom-4 right-4 z-[1000] flex flex-col gap-2">
               <button
                 onClick={centerOnUser}
@@ -785,7 +736,6 @@ export default function FindCenters() {
               </button>
             </div>
             
-            {/* Live indicator with update count */}
             <div className="absolute top-4 left-4 z-[1000]">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-black/50 backdrop-blur-md rounded-full shadow-md border border-white/20">
                 <span className="relative flex h-2.5 w-2.5">
@@ -799,7 +749,6 @@ export default function FindCenters() {
               </div>
             </div>
 
-            {/* Stop Navigation Button (Floating) */}
             {isNavigating && !hasArrived && (
               <div className="absolute bottom-4 left-4 z-[1000]">
                 <button
@@ -814,7 +763,6 @@ export default function FindCenters() {
           </div>
         </div>
 
-        {/* Places List - Hidden during navigation */}
         {placesWithDistance.length > 0 && !isNavigating && (
           <div className="bg-white/5 rounded-2xl shadow-lg border border-white/10 p-4">
             <h2 className="font-semibold font-heading text-white mb-3 flex items-center gap-2">
@@ -875,7 +823,6 @@ export default function FindCenters() {
           </div>
         )}
 
-        {/* Empty state */}
         {!searching && places.length === 0 && !isNavigating && (
           <div className="bg-white/5 rounded-2xl shadow-lg border border-white/10 p-8 text-center">
             <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -897,7 +844,6 @@ export default function FindCenters() {
         )}
       </div>
       
-      {/* CSS for animations */}
       <style>{`
         @keyframes pulse-ring {
           0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
