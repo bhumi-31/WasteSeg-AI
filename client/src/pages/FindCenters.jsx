@@ -551,20 +551,20 @@ export default function FindCenters() {
               </button>
             </div>
             
-            <div className="flex gap-2 overflow-x-auto pb-1">
+            <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 -mx-1 px-1">
               {Object.entries(PLACE_TYPES).map(([key, config]) => {
                 const IconComponent = config.icon;
                 return (
                   <button
                     key={key}
                     onClick={() => setPlaceType(key)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
+                    className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
                       placeType === key 
                         ? 'bg-emerald-500 text-black shadow-md' 
                         : 'bg-white/10 text-white/60 hover:bg-white/15'
                     }`}
                   >
-                    <IconComponent className="h-4 w-4" />
+                    <IconComponent className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     {config.label}
                   </button>
                 );
