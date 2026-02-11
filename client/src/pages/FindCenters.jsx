@@ -153,8 +153,9 @@ function MapController({ userPos, destination, isNavigating, mapRef, shouldFollo
 export default function FindCenters() {
   const [userPos, setUserPos] = useState(null);
   const [accuracy, setAccuracy] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [locationError, setLocationError] = useState(null);
+  const [locationRequested, setLocationRequested] = useState(false);
   
   // Location tracking state
   const [lastUpdateTime, setLastUpdateTime] = useState(null);
@@ -179,7 +180,12 @@ export default function FindCenters() {
   const lastPosRef = useRef(null);
   const staleCheckCountRef = useRef(0);
 
-  useEffect(() => {
+  // Request location only after user interaction (required for iOS)
+  const requestLocation = () => {
+    setLocationRequested(true);
+    setLoading(true);
+    setLocationError(null);
+    
     if (!navigator.geolocation) {
       setLocationError('Geolocation not supported in this browser');
       setLoading(false);
@@ -255,7 +261,10 @@ export default function FindCenters() {
         timeout: 10000 
       }
     );
+  };
 
+  // Cleanup watch on unmount
+  useEffect(() => {
     return () => {
       if (watchIdRef.current) {
         navigator.geolocation.clearWatch(watchIdRef.current);
@@ -414,6 +423,36 @@ export default function FindCenters() {
 
   // Detect if on mobile
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // Initial state - show button to request location (required for iOS)
+  if (!locationRequested && !userPos) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-background p-4">
+        <div className="bg-card rounded-2xl shadow-card border border-border p-8 max-w-md w-full text-center">
+          <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+            <MapPin className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <h2 className="text-2xl font-bold font-heading text-foreground mb-3">Find Nearby Centers</h2>
+          <p className="text-muted-foreground mb-6">
+            We need your location to show nearby waste disposal and recycling centers.
+          </p>
+          <button
+            onClick={requestLocation}
+            className="w-full px-6 py-4 bg-gradient-hero text-primary-foreground rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+          >
+            <Navigation className="h-5 w-5" />
+            Enable Location
+          </button>
+          {isIOS && (
+            <p className="mt-4 text-xs text-muted-foreground">
+              On iOS: If prompted, tap "Allow" to share your location. If denied previously, go to Settings → Safari → Location → Allow.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // Loading state
   if (loading) {
@@ -440,9 +479,21 @@ export default function FindCenters() {
             <MapPin className="h-8 w-8 text-[hsl(var(--hazardous))]" />
           </div>
           <h2 className="text-xl font-bold font-heading text-foreground mb-2">Location Required</h2>
-          <p className="text-muted-foreground mb-6">{locationError}</p>
+          <p className="text-muted-foreground mb-4">{locationError}</p>
+          {isIOS && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 mb-6 text-left">
+              <p className="text-sm text-amber-800 dark:text-amber-200 font-medium mb-2">On iPhone/iPad:</p>
+              <ol className="text-xs text-amber-700 dark:text-amber-300 space-y-1 list-decimal list-inside">
+                <li>Open <strong>Settings</strong> on your device</li>
+                <li>Scroll down and tap <strong>Safari</strong></li>
+                <li>Tap <strong>Location</strong></li>
+                <li>Select <strong>Allow</strong> or <strong>Ask</strong></li>
+                <li>Return here and tap Try Again</li>
+              </ol>
+            </div>
+          )}
           <button
-            onClick={() => window.location.reload()}
+            onClick={requestLocation}
             className="px-6 py-3 bg-gradient-hero text-primary-foreground rounded-xl font-medium hover:opacity-90 transition-opacity"
           >
             Try Again
