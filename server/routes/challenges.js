@@ -1,6 +1,9 @@
 import express from 'express';
 import Stats from '../models/Stats.js';
 import { Challenge, UserChallenge } from '../models/Challenge.js';
+import { authMiddleware } from '../middleware/auth.js';
+import { validate } from '../middleware/validate.js';
+import { challengeUpdateSchema, challengeClaimSchema } from '../validators/schemas.js';
 
 const router = express.Router();
 
@@ -37,12 +40,10 @@ async function generateDailyChallenges() {
     expiresAt: { $gte: new Date() }
   });
 
-  // If we already have valid challenges for today, return them
   if (existingChallenges.length >= 3) {
     return existingChallenges.slice(0, 3);
   }
 
-  // Generate new challenges
   const shuffled = CHALLENGE_TEMPLATES.sort(() => Math.random() - 0.5);
   const selectedTemplates = shuffled.slice(0, 3);
   const endOfDay = getEndOfDay();
@@ -51,10 +52,9 @@ async function generateDailyChallenges() {
   for (let i = 0; i < selectedTemplates.length; i++) {
     const template = selectedTemplates[i];
     const challengeId = `${today}-${i}`;
-    
-    // Check if this challenge already exists
+
     let challenge = await Challenge.findOne({ challengeId });
-    
+
     if (!challenge) {
       challenge = new Challenge({
         challengeId,
@@ -74,17 +74,18 @@ async function generateDailyChallenges() {
   return newChallenges;
 }
 
-// GET - Leaderboard (top users by points)
+/**
+ * GET /api/leaderboard — Top users by points (public)
+ */
 router.get('/leaderboard', async (req, res) => {
   try {
     const { limit = 20 } = req.query;
-    
+
     const leaderboard = await Stats.find({})
       .sort({ totalPoints: -1 })
       .limit(parseInt(limit))
       .select('userId totalPoints totalScans currentStreak badges co2Saved');
-    
-    // Format response with ranks
+
     const formattedLeaderboard = leaderboard.map((user, index) => ({
       rank: index + 1,
       userId: user.userId,
@@ -103,11 +104,13 @@ router.get('/leaderboard', async (req, res) => {
   }
 });
 
-// GET - User rank on leaderboard
-router.get('/leaderboard/rank/:userId', async (req, res) => {
+/**
+ * GET /api/leaderboard/rank — User rank on leaderboard (protected)
+ */
+router.get('/leaderboard/rank', authMiddleware, async (req, res) => {
   try {
-    const { userId } = req.params;
-    
+    const userId = req.user.id;
+
     const userStats = await Stats.findOne({ userId });
     if (!userStats) {
       return res.json({ rank: null, totalUsers: 0 });
@@ -130,11 +133,13 @@ router.get('/leaderboard/rank/:userId', async (req, res) => {
   }
 });
 
-// GET - Daily challenges
+/**
+ * GET /api/challenges — Daily challenges (public)
+ */
 router.get('/challenges', async (req, res) => {
   try {
     const challenges = await generateDailyChallenges();
-    
+
     res.json({
       challenges: challenges.map(c => ({
         id: c.challengeId,
@@ -153,22 +158,21 @@ router.get('/challenges', async (req, res) => {
   }
 });
 
-// GET - User's challenge progress
-router.get('/challenges/progress/:userId', async (req, res) => {
+/**
+ * GET /api/challenges/progress — User's challenge progress (protected)
+ */
+router.get('/challenges/progress', authMiddleware, async (req, res) => {
   try {
-    const { userId } = req.params;
-    
-    // Get today's challenges
+    const userId = req.user.id;
+
     const challenges = await generateDailyChallenges();
     const challengeIds = challenges.map(c => c.challengeId);
-    
-    // Get user's progress for these challenges
+
     const userProgress = await UserChallenge.find({
       userId,
       challengeId: { $in: challengeIds }
     });
 
-    // Create a map for quick lookup
     const progressMap = {};
     userProgress.forEach(up => {
       progressMap[up.challengeId] = {
@@ -179,7 +183,6 @@ router.get('/challenges/progress/:userId', async (req, res) => {
       };
     });
 
-    // Combine challenges with user progress
     const challengesWithProgress = challenges.map(c => ({
       id: c.challengeId,
       title: c.title,
@@ -202,22 +205,19 @@ router.get('/challenges/progress/:userId', async (req, res) => {
   }
 });
 
-// POST - Update challenge progress after a scan
-router.post('/challenges/update', async (req, res) => {
+/**
+ * POST /api/challenges/update — Update challenge progress after a scan (protected)
+ */
+router.post('/challenges/update', authMiddleware, validate(challengeUpdateSchema), async (req, res) => {
   try {
-    const { userId, category } = req.body;
-    
-    if (!userId) {
-      return res.status(400).json({ error: 'userId is required' });
-    }
+    const userId = req.user.id;
+    const { category } = req.body;
 
-    // Get today's challenges
     const challenges = await generateDailyChallenges();
     const updatedChallenges = [];
     const newlyCompleted = [];
 
     for (const challenge of challenges) {
-      // Check if user already has progress for this challenge
       let userChallenge = await UserChallenge.findOne({
         userId,
         challengeId: challenge.challengeId
@@ -232,7 +232,6 @@ router.post('/challenges/update', async (req, res) => {
         });
       }
 
-      // Skip if already completed
       if (userChallenge.completed) {
         updatedChallenges.push({
           id: challenge.challengeId,
@@ -243,15 +242,13 @@ router.post('/challenges/update', async (req, res) => {
         continue;
       }
 
-      // Update progress based on challenge type
       let shouldIncrement = false;
-      
+
       if (challenge.type === 'scan_count') {
         shouldIncrement = true;
       } else if (challenge.type === 'category_scan' && challenge.category === category) {
         shouldIncrement = true;
       } else if (challenge.type === 'streak') {
-        // Streak challenges are handled separately
         const userStats = await Stats.findOne({ userId });
         if (userStats && userStats.currentStreak >= 1) {
           shouldIncrement = true;
@@ -263,7 +260,6 @@ router.post('/challenges/update', async (req, res) => {
         userChallenge.progress += 1;
       }
 
-      // Check if challenge is completed
       if (userChallenge.progress >= challenge.target && !userChallenge.completed) {
         userChallenge.completed = true;
         userChallenge.completedAt = new Date();
@@ -294,22 +290,19 @@ router.post('/challenges/update', async (req, res) => {
   }
 });
 
-// POST - Claim reward for completed challenge
-router.post('/challenges/claim', async (req, res) => {
+/**
+ * POST /api/challenges/claim — Claim reward for completed challenge (protected)
+ */
+router.post('/challenges/claim', authMiddleware, validate(challengeClaimSchema), async (req, res) => {
   try {
-    const { userId, challengeId } = req.body;
-    
-    if (!userId || !challengeId) {
-      return res.status(400).json({ error: 'userId and challengeId are required' });
-    }
+    const userId = req.user.id;
+    const { challengeId } = req.body;
 
-    // Get the challenge
     const challenge = await Challenge.findOne({ challengeId });
     if (!challenge) {
       return res.status(404).json({ error: 'Challenge not found' });
     }
 
-    // Get user's progress
     const userChallenge = await UserChallenge.findOne({ userId, challengeId });
     if (!userChallenge || !userChallenge.completed) {
       return res.status(400).json({ error: 'Challenge not completed' });
@@ -319,16 +312,14 @@ router.post('/challenges/claim', async (req, res) => {
       return res.status(400).json({ error: 'Reward already claimed' });
     }
 
-    // Award points to user
     let stats = await Stats.findOne({ userId });
     if (!stats) {
       stats = new Stats({ userId, totalPoints: 0 });
     }
-    
+
     stats.totalPoints += challenge.points;
     await stats.save();
 
-    // Mark reward as claimed
     userChallenge.rewardClaimed = true;
     await userChallenge.save();
 

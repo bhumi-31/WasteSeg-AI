@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import analyzeRoutes from './routes/analyze.js';
 import historyRoutes from './routes/history.js';
 import challengesRoutes from './routes/challenges.js';
+import authRoutes from './routes/auth.js';
 import connectDB from './config/db.js';
 
 // Load environment variables from server's .env file
@@ -38,6 +39,7 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api', analyzeRoutes);
 app.use('/api', historyRoutes);
 app.use('/api', challengesRoutes);

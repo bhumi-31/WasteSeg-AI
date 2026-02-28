@@ -1,4 +1,4 @@
-import { saveScanToDb, fetchScanHistory, fetchStats as fetchStatsFromApi, updateChallengeProgress, getUserId } from './api';
+import { saveScanToDb, fetchScanHistory, fetchStats as fetchStatsFromApi, updateChallengeProgress } from './api';
 
 const STORAGE_KEY = 'wasteseg-history';
 const STATS_KEY = 'wasteseg-stats';
@@ -26,15 +26,13 @@ const DEFAULT_STATS = {
  * Should be called on app startup
  */
 export async function initializeData() {
-  const userId = getUserId();
-  
   try {
-    // Fetch fresh data from database
+    // Fetch fresh data from database using JWT auth
     const [dbHistory, dbStats] = await Promise.all([
       fetchScanHistory(100),
       fetchStatsFromApi()
     ]);
-    
+
     // Update localStorage with DB data
     if (dbHistory && dbHistory.length > 0) {
       const formattedHistory = dbHistory.map(scan => ({
@@ -51,19 +49,19 @@ export async function initializeData() {
       }));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(formattedHistory));
     }
-    
+
     if (dbStats && dbStats.totalScans > 0) {
       localStorage.setItem(STATS_KEY, JSON.stringify(dbStats));
       if (dbStats.badges) {
         localStorage.setItem(BADGES_KEY, JSON.stringify(dbStats.badges));
       }
     }
-    
+
     localStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
-    return { synced: true, userId };
+    return { synced: true };
   } catch (error) {
     console.warn('[Storage] Could not sync from database:', error.message);
-    return { synced: false, userId, error: error.message };
+    return { synced: false, error: error.message };
   }
 }
 
@@ -134,7 +132,7 @@ function getDayKey(date) {
 function updateStreak(stats) {
   const today = getDayKey(new Date());
   const yesterday = getDayKey(new Date(Date.now() - 86400000));
-  
+
   if (stats.lastScanDate === today) {
     // Already scanned today, no streak change
     return stats;
@@ -145,12 +143,12 @@ function updateStreak(stats) {
     // Streak broken, reset to 1
     stats.currentStreak = 1;
   }
-  
+
   // Update longest streak
   if (stats.currentStreak > stats.longestStreak) {
     stats.longestStreak = stats.currentStreak;
   }
-  
+
   stats.lastScanDate = today;
   return stats;
 }
@@ -158,27 +156,27 @@ function updateStreak(stats) {
 function checkAndAwardBadges(stats) {
   const currentBadges = getBadges();
   const newBadges = [];
-  
+
   // Check scan-based badges
   if (stats.totalScans >= 1 && !currentBadges.includes('first_scan')) newBadges.push('first_scan');
   if (stats.totalScans >= 10 && !currentBadges.includes('ten_scans')) newBadges.push('ten_scans');
   if (stats.totalScans >= 50 && !currentBadges.includes('fifty_scans')) newBadges.push('fifty_scans');
   if (stats.totalScans >= 100 && !currentBadges.includes('hundred_scans')) newBadges.push('hundred_scans');
-  
+
   // Check streak-based badges
   if (stats.currentStreak >= 3 && !currentBadges.includes('streak_3')) newBadges.push('streak_3');
   if (stats.currentStreak >= 7 && !currentBadges.includes('streak_7')) newBadges.push('streak_7');
   if (stats.currentStreak >= 30 && !currentBadges.includes('streak_30')) newBadges.push('streak_30');
-  
+
   // Check category-based badges
   if (stats.categoryBreakdown.recyclable >= 20 && !currentBadges.includes('recycler')) newBadges.push('recycler');
   if (stats.categoryBreakdown.organic >= 20 && !currentBadges.includes('composter')) newBadges.push('composter');
   if (stats.categoryBreakdown.hazardous >= 10 && !currentBadges.includes('safety_first')) newBadges.push('safety_first');
-  
+
   if (newBadges.length > 0) {
     localStorage.setItem(BADGES_KEY, JSON.stringify([...currentBadges, ...newBadges]));
   }
-  
+
   return newBadges;
 }
 
@@ -187,31 +185,31 @@ export async function saveScanResult(result) {
   const history = getScanHistory();
   history.unshift(result);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 100)));
-  
+
   // Update local stats
   let stats = getStats();
   stats.totalScans += 1;
   stats.totalPoints += 10; // 10 points per scan
-  
+
   // Update category breakdown
   const category = result.category || 'recyclable';
   stats.categoryBreakdown[category] = (stats.categoryBreakdown[category] || 0) + 1;
-  
+
   // Update CO2 savings
   stats.co2Saved += CO2_SAVINGS[category] || 0;
-  
+
   // Update weekly stats
   const weekKey = getWeekKey(new Date());
   stats.weeklyScans[weekKey] = (stats.weeklyScans[weekKey] || 0) + 1;
-  
+
   // Update streak
   stats = updateStreak(stats);
-  
+
   localStorage.setItem(STATS_KEY, JSON.stringify(stats));
-  
+
   // Check for new badges
   const newBadges = checkAndAwardBadges(stats);
-  
+
   // Also save to MongoDB (async, don't block)
   try {
     await saveScanToDb({
@@ -222,12 +220,12 @@ export async function saveScanResult(result) {
       tips: result.tips || [],
       imageUrl: result.imageUrl || ''
     });
-    
+
     const challengeResult = await updateChallengeProgress(category);
   } catch (error) {
     console.warn('Failed to save to database, using localStorage:', error.message);
   }
-  
+
   return { stats, newBadges };
 }
 
@@ -290,7 +288,7 @@ export function getWeeklyProgress() {
   const stats = getStats();
   const weeks = [];
   const now = new Date();
-  
+
   // Get last 8 weeks
   for (let i = 7; i >= 0; i--) {
     const date = new Date(now);
@@ -301,6 +299,6 @@ export function getWeeklyProgress() {
       scans: stats.weeklyScans[weekKey] || 0
     });
   }
-  
+
   return weeks;
 }

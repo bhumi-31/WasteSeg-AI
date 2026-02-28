@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  TrendingUp, Leaf, Recycle, AlertTriangle, Flame, Trophy, 
+import {
+  TrendingUp, Leaf, Recycle, AlertTriangle, Flame, Trophy,
   Target, BarChart3, ArrowRight, Sprout, TreePine, Globe, Zap, Gem, Check
 } from 'lucide-react';
 import { getStats, getBadges, getBadgeDefinitions, getWeeklyProgress, fetchStatsFromDb } from '../lib/storage';
@@ -20,7 +20,7 @@ export default function Stats() {
     setStats(getStats());
     setBadges(getBadges());
     setWeeklyData(getWeeklyProgress());
-    
+
     async function loadFromDb() {
       try {
         const dbStats = await fetchStatsFromDb();
@@ -44,23 +44,23 @@ export default function Stats() {
   }
 
   const categoryData = [
-    { 
-      name: 'Recyclable', 
-      value: stats.categoryBreakdown.recyclable, 
+    {
+      name: 'Recyclable',
+      value: stats.categoryBreakdown.recyclable,
       color: 'bg-[hsl(var(--recyclable))]',
       icon: Recycle,
       textColor: 'text-[hsl(var(--recyclable))]'
     },
-    { 
-      name: 'Organic', 
-      value: stats.categoryBreakdown.organic, 
+    {
+      name: 'Organic',
+      value: stats.categoryBreakdown.organic,
       color: 'bg-[hsl(var(--organic))]',
       icon: Leaf,
       textColor: 'text-[hsl(var(--organic))]'
     },
-    { 
-      name: 'Hazardous', 
-      value: stats.categoryBreakdown.hazardous, 
+    {
+      name: 'Hazardous',
+      value: stats.categoryBreakdown.hazardous,
       color: 'bg-[hsl(var(--hazardous))]',
       icon: AlertTriangle,
       textColor: 'text-[hsl(var(--hazardous))]'
@@ -82,25 +82,25 @@ export default function Stats() {
       </div>
 
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard 
+        <StatCard
           icon={Target}
           label="Total Scans"
           value={stats.totalScans}
           color="bg-primary/10 text-primary"
         />
-        <StatCard 
+        <StatCard
           icon={Trophy}
           label="Total Points"
           value={stats.totalPoints}
           color="bg-accent/10 text-accent"
         />
-        <StatCard 
+        <StatCard
           icon={Flame}
           label="Current Streak"
           value={`${stats.currentStreak} days`}
           color="bg-[hsl(var(--hazardous-light))] text-[hsl(var(--hazardous))]"
         />
-        <StatCard 
+        <StatCard
           icon={Leaf}
           label="CO₂ Saved"
           value={`${stats.co2Saved.toFixed(1)} kg`}
@@ -113,11 +113,11 @@ export default function Stats() {
           <BarChart3 className="h-5 w-5 text-emerald-400" />
           Category Breakdown
         </h2>
-        
+
         {totalCategoryScans === 0 ? (
           <div className="py-8 text-center text-white/60">
             <p>No scans yet. Start scanning to see your breakdown!</p>
-            <Link 
+            <Link
               to="/scan"
               className="mt-4 inline-flex items-center gap-2 text-emerald-400 hover:underline"
             >
@@ -138,7 +138,7 @@ export default function Stats() {
                   </span>
                 </div>
                 <div className="h-3 overflow-hidden rounded-full bg-white/10">
-                  <div 
+                  <div
                     className={`h-full ${cat.color} transition-all duration-500`}
                     style={{ width: `${totalCategoryScans > 0 ? (cat.value / totalCategoryScans) * 100 : 0}%` }}
                   />
@@ -154,13 +154,13 @@ export default function Stats() {
           <TrendingUp className="h-5 w-5 text-emerald-400" />
           Weekly Progress
         </h2>
-        
+
         <div className="flex h-40 items-end gap-2">
           {weeklyData.map((week, index) => (
-            <div key={week.week} className="flex flex-1 flex-col items-center gap-2">
-              <div 
+            <div key={index} className="flex flex-1 flex-col items-center gap-2">
+              <div
                 className="w-full rounded-t-lg bg-emerald-500/80 transition-all duration-300 hover:bg-emerald-500"
-                style={{ 
+                style={{
                   height: `${maxWeeklyScans > 0 ? (week.scans / maxWeeklyScans) * 100 : 0}%`,
                   minHeight: week.scans > 0 ? '8px' : '2px'
                 }}
@@ -181,19 +181,18 @@ export default function Stats() {
           <Trophy className="h-5 w-5 text-yellow-500" />
           Achievements
         </h2>
-        
+
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {Object.entries(badgeDefinitions).map(([key, badge]) => {
             const earned = badges.includes(key);
             const IconComponent = BADGE_ICONS[badge.iconName] || Leaf;
             return (
-              <div 
+              <div
                 key={key}
-                className={`flex items-center gap-3 rounded-xl border p-3 transition-all ${
-                  earned 
-                    ? 'border-emerald-500/30 bg-emerald-500/10' 
+                className={`flex items-center gap-3 rounded-xl border p-3 transition-all ${earned
+                    ? 'border-emerald-500/30 bg-emerald-500/10'
                     : 'border-white/10 bg-white/5 opacity-50'
-                }`}
+                  }`}
               >
                 <div className={`p-2 rounded-lg ${earned ? 'bg-emerald-500/20' : 'bg-white/10'}`}>
                   <IconComponent className={`h-5 w-5 ${earned ? 'text-emerald-400' : 'text-white/40'}`} />

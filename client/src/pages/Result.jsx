@@ -38,7 +38,7 @@ function useConfetti() {
 
     function animate() {
       const elapsed = Date.now() - startTime;
-      
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       particles.forEach((p) => {
@@ -109,27 +109,31 @@ export default function Result() {
   const confettiCanvasRef = useConfetti();
 
   useEffect(() => {
-    if (!state) navigate('/scan', { replace: true });
-  }, [state, navigate]);
+    if (!state) {
+      navigate('/scan', { replace: true });
+      return;
+    }
+
+    // Auto-save scan result on mount
+    if (!saved) {
+      saveScanResult({
+        id: crypto.randomUUID(),
+        category: state.category,
+        imageUrl: state.imageUrl,
+        timestamp: Date.now(),
+        itemName: state.itemName,
+        explanation: state.disposalSteps?.join(' ') || '',
+        tip: state.environmentalTip || '',
+        disposalMethod: state.disposalSteps?.join(' ') || '',
+        tips: state.disposalSteps || []
+      }).then(() => setSaved(true))
+        .catch(err => console.warn('Auto-save failed:', err));
+    }
+  }, [state, navigate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!state) return null;
 
   const config = categoryConfig[state.category] || categoryConfig.recyclable;
-
-  const handleSave = async () => {
-    await saveScanResult({
-      id: crypto.randomUUID(),
-      category: state.category,
-      imageUrl: state.imageUrl,
-      timestamp: Date.now(),
-      itemName: state.itemName,
-      explanation: state.disposalSteps?.join(' ') || '',
-      tip: state.environmentalTip || '',
-      disposalMethod: state.disposalSteps?.join(' ') || '',
-      tips: state.disposalSteps || []
-    });
-    setSaved(true);
-  };
 
   return (
     <div className="mx-auto max-w-xl px-4 py-10 pt-24 sm:py-16 sm:pt-28 relative">
@@ -242,18 +246,15 @@ export default function Result() {
             <RotateCcw className="h-4 w-4" />
             Scan Another
           </button>
-          <button
-            onClick={handleSave}
-            disabled={saved}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-              saved
-                ? 'bg-white/10 text-white/50 cursor-not-allowed'
-                : 'bg-emerald-500 text-black hover:bg-emerald-400'
-            }`}
+          <div
+            className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium ${saved
+              ? 'bg-white/10 text-emerald-400'
+              : 'bg-white/10 text-white/50'
+              }`}
           >
             <Save className="h-4 w-4" />
-            {saved ? 'Saved ✓' : 'Save to History'}
-          </button>
+            {saved ? 'Saved ✓' : 'Saving...'}
+          </div>
         </div>
       </div>
 
@@ -263,13 +264,13 @@ export default function Result() {
           <div>
             <p className="text-sm font-semibold text-white">Find Nearby Disposal</p>
             <p className="mt-1 text-xs text-white/60">
-              {state.category === 'hazardous' 
+              {state.category === 'hazardous'
                 ? 'Search for hazardous waste collection centers in your area.'
                 : 'Check your local recycling guidelines for specific instructions.'}
             </p>
             <a
               href={`https://www.google.com/maps/search/${encodeURIComponent(
-                state.category === 'hazardous' 
+                state.category === 'hazardous'
                   ? 'hazardous waste disposal near me'
                   : 'recycling center near me'
               )}`}

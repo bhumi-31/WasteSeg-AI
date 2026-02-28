@@ -1,8 +1,14 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://bhumikanarula07_db_user:R2VEh7TVlTjarFWd@wastemanagement.6pmert2.mongodb.net/wastewise?retryWrites=true&w=majority';
-
 export async function connectDB() {
+  const MONGODB_URI = process.env.MONGODB_URI;
+
+  if (!MONGODB_URI) {
+    console.error('❌ MONGODB_URI is not set in environment variables.');
+    console.error('   Create a .env file with MONGODB_URI=your_connection_string');
+    return null;
+  }
+
   try {
     const conn = await mongoose.connect(MONGODB_URI);
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);

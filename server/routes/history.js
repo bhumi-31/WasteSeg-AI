@@ -1,6 +1,9 @@
 import express from 'express';
 import Scan from '../models/Scan.js';
 import Stats from '../models/Stats.js';
+import { authMiddleware } from '../middleware/auth.js';
+import { validate } from '../middleware/validate.js';
+import { scanSchema } from '../validators/schemas.js';
 
 const router = express.Router();
 
@@ -42,31 +45,31 @@ function getWeekKey(date) {
 function checkBadges(stats) {
   const currentBadges = stats.badges || [];
   const newBadges = [];
-  
+
   if (stats.totalScans >= 1 && !currentBadges.includes('first_scan')) newBadges.push('first_scan');
   if (stats.totalScans >= 10 && !currentBadges.includes('ten_scans')) newBadges.push('ten_scans');
   if (stats.totalScans >= 50 && !currentBadges.includes('fifty_scans')) newBadges.push('fifty_scans');
   if (stats.totalScans >= 100 && !currentBadges.includes('hundred_scans')) newBadges.push('hundred_scans');
-  
+
   if (stats.currentStreak >= 3 && !currentBadges.includes('streak_3')) newBadges.push('streak_3');
   if (stats.currentStreak >= 7 && !currentBadges.includes('streak_7')) newBadges.push('streak_7');
   if (stats.currentStreak >= 30 && !currentBadges.includes('streak_30')) newBadges.push('streak_30');
-  
+
   if (stats.categoryBreakdown.recyclable >= 20 && !currentBadges.includes('recycler')) newBadges.push('recycler');
   if (stats.categoryBreakdown.organic >= 20 && !currentBadges.includes('composter')) newBadges.push('composter');
   if (stats.categoryBreakdown.hazardous >= 10 && !currentBadges.includes('safety_first')) newBadges.push('safety_first');
-  
+
   return newBadges;
 }
 
-// POST - Save a new scan
-router.post('/scans', async (req, res) => {
+/**
+ * POST /api/scans — Save a new scan (protected)
+ * Uses req.user.id from JWT instead of body userId
+ */
+router.post('/scans', authMiddleware, validate(scanSchema), async (req, res) => {
   try {
-    const { userId, itemName, category, confidence, disposalMethod, tips, imageUrl } = req.body;
-    
-    if (!userId || !itemName || !category) {
-      return res.status(400).json({ error: 'userId, itemName, and category are required' });
-    }
+    const userId = req.user.id;
+    const { itemName, category, confidence, disposalMethod, tips, imageUrl } = req.body;
 
     // Save scan to database
     const scan = new Scan({
@@ -85,9 +88,9 @@ router.post('/scans', async (req, res) => {
     const today = getDayKey(new Date());
     const yesterday = getDayKey(new Date(Date.now() - 86400000));
     const weekKey = getWeekKey(new Date());
-    
+
     if (!stats) {
-      stats = new Stats({ 
+      stats = new Stats({
         userId,
         totalScans: 1,
         totalPoints: 10,
@@ -103,17 +106,17 @@ router.post('/scans', async (req, res) => {
     } else {
       stats.totalScans += 1;
       stats.totalPoints += 10;
-      
+
       // Update category breakdown
       stats.categoryBreakdown[category] = (stats.categoryBreakdown[category] || 0) + 1;
-      
+
       // Update CO2 savings
       stats.co2Saved += CO2_SAVINGS[category] || 0;
-      
+
       // Update weekly scans
       const currentWeekScans = stats.weeklyScans.get(weekKey) || 0;
       stats.weeklyScans.set(weekKey, currentWeekScans + 1);
-      
+
       // Update streak
       if (stats.lastScanDate !== today) {
         if (stats.lastScanDate === yesterday) {
@@ -123,22 +126,22 @@ router.post('/scans', async (req, res) => {
         }
         stats.lastScanDate = today;
       }
-      
+
       if (stats.currentStreak > stats.longestStreak) {
         stats.longestStreak = stats.currentStreak;
       }
     }
-    
+
     // Check for new badges
     const newBadges = checkBadges(stats);
     if (newBadges.length > 0) {
       stats.badges = [...(stats.badges || []), ...newBadges];
     }
-    
+
     await stats.save();
 
-    res.status(201).json({ 
-      scan, 
+    res.status(201).json({
+      scan,
       stats: {
         totalScans: stats.totalScans,
         totalPoints: stats.totalPoints,
@@ -148,7 +151,7 @@ router.post('/scans', async (req, res) => {
         co2Saved: stats.co2Saved,
         badges: stats.badges
       },
-      newBadges 
+      newBadges
     });
   } catch (error) {
     console.error('Error saving scan:', error);
@@ -156,19 +159,21 @@ router.post('/scans', async (req, res) => {
   }
 });
 
-// GET - Fetch scan history for a user
-router.get('/scans/:userId', async (req, res) => {
+/**
+ * GET /api/scans — Fetch scan history for the authenticated user (protected)
+ */
+router.get('/scans', authMiddleware, async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
     const { limit = 50, skip = 0 } = req.query;
-    
+
     const scans = await Scan.find({ userId })
       .sort({ timestamp: -1 })
       .skip(parseInt(skip))
       .limit(parseInt(limit));
-    
+
     const total = await Scan.countDocuments({ userId });
-    
+
     res.json({ scans, total });
   } catch (error) {
     console.error('Error fetching scans:', error);
@@ -176,15 +181,16 @@ router.get('/scans/:userId', async (req, res) => {
   }
 });
 
-// GET - Fetch stats for a user
-router.get('/stats/:userId', async (req, res) => {
+/**
+ * GET /api/stats — Fetch stats for the authenticated user (protected)
+ */
+router.get('/stats', authMiddleware, async (req, res) => {
   try {
-    const { userId } = req.params;
-    
+    const userId = req.user.id;
+
     let stats = await Stats.findOne({ userId });
-    
+
     if (!stats) {
-      // Return default stats if user has no history
       return res.json({
         totalPoints: 0,
         totalScans: 0,
@@ -197,7 +203,7 @@ router.get('/stats/:userId', async (req, res) => {
         badges: []
       });
     }
-    
+
     // Convert Map to object for response
     const weeklyScansObj = {};
     if (stats.weeklyScans) {
@@ -205,7 +211,7 @@ router.get('/stats/:userId', async (req, res) => {
         weeklyScansObj[key] = value;
       });
     }
-    
+
     res.json({
       totalPoints: stats.totalPoints,
       totalScans: stats.totalScans,
@@ -223,10 +229,23 @@ router.get('/stats/:userId', async (req, res) => {
   }
 });
 
-// DELETE - Delete a specific scan
-router.delete('/scans/:scanId', async (req, res) => {
+/**
+ * DELETE /api/scans/:scanId — Delete a specific scan (protected)
+ */
+router.delete('/scans/:scanId', authMiddleware, async (req, res) => {
   try {
     const { scanId } = req.params;
+    const scan = await Scan.findById(scanId);
+
+    if (!scan) {
+      return res.status(404).json({ error: 'Scan not found' });
+    }
+
+    // Ensure user can only delete their own scans
+    if (scan.userId !== req.user.id) {
+      return res.status(403).json({ error: 'Not authorized to delete this scan' });
+    }
+
     await Scan.findByIdAndDelete(scanId);
     res.json({ message: 'Scan deleted successfully' });
   } catch (error) {

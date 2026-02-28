@@ -39,15 +39,20 @@ Important:
 
 /**
  * Analyze a waste image using OpenAI GPT-4 Vision
- * @param {string} base64Image - Base64 encoded image with data URI
+ * @param {string} imageInput - Base64 encoded image with data URI or a URL
  * @returns {Object} Classification result
  */
-export async function analyzeWasteImage(base64Image) {
+export async function analyzeWasteImage(imageInput) {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OpenAI API key is not configured');
   }
 
   const client = getOpenAIClient();
+
+  // Determine if input is a URL or base64
+  const imageUrl = imageInput.startsWith('http')
+    ? { url: imageInput, detail: "low" }
+    : { url: imageInput, detail: "low" };
 
   try {
     const response = await client.chat.completions.create({
@@ -66,10 +71,7 @@ export async function analyzeWasteImage(base64Image) {
             },
             {
               type: "image_url",
-              image_url: {
-                url: base64Image,
-                detail: "low" // Use low detail for faster processing and lower cost
-              }
+              image_url: imageUrl
             }
           ]
         }
@@ -79,7 +81,7 @@ export async function analyzeWasteImage(base64Image) {
     });
 
     const content = response.choices[0]?.message?.content;
-    
+
     if (!content) {
       throw new Error('No response from AI model');
     }
@@ -124,7 +126,7 @@ export async function analyzeWasteImage(base64Image) {
       console.error('Failed to parse AI response:', error);
       throw new Error('Failed to parse AI response. Please try again.');
     }
-    
+
     throw error;
   }
 }
